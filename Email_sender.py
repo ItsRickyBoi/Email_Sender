@@ -7,16 +7,23 @@ import threading
 import time
 import os
 
-def send_email(receiver_email, attachment_path=None, html_path=None):
-    sender_email = "your@mail.co" #your hotmail email
-    password = "your_hotmail_password" #your hotmail password ( must be your hotmail password, not your app password)
-    sender_name = "Your Name" #your name
+def send_email(receiver_email, sender_email, password, attachment_path=None, html_path=None):
+    # Determine the SMTP server and port based on the sender's email domain
+    if "@gmail.com" in sender_email:
+        smtp_server = "smtp.gmail.com"
+        port = 587
+    elif "@hotmail.com" in sender_email or "@outlook.com" in sender_email:
+        smtp_server = "smtp.office365.com"
+        port = 587
+    else:
+        print("Unsupported email service")
+        return
 
-    # Create MIME message
-    msg = MIMEMultipart('alternative')  # Use 'alternative' to support both plain text and HTML
+    sender_name = "Your Name Here"  # Add your name here
+    msg = MIMEMultipart('alternative')
     msg['From'] = f"{sender_name} <{sender_email}>"
     msg['To'] = receiver_email
-    msg['Subject'] = "HTML Email from Hotmail"
+    msg['Subject'] = "HTML Email"
 
     # Email body - you could include a plain text version here as well
     if html_path:
@@ -40,7 +47,7 @@ def send_email(receiver_email, attachment_path=None, html_path=None):
 
     # Setup the SMTP server and send the email
     try:
-        server = smtplib.SMTP('smtp.office365.com', 587)
+        server = smtplib.SMTP(smtp_server, port)
         server.starttls()
         server.login(sender_email, password)
         text = msg.as_string()
@@ -51,10 +58,15 @@ def send_email(receiver_email, attachment_path=None, html_path=None):
         print(f"Failed to send email to {receiver_email}. Error: {e}")
 
     # Delay before sending the next email
-    time.sleep(2)  # Adjust the delay as needed
+    time.sleep(2)
 
 def main():
-    # Ask user if they want to attach a file
+    sender_email = input("Enter your email address: ").strip()
+    # Check if the email is a Gmail account and remind the user accordingly
+    if "@gmail.com" in sender_email:
+        print("Since you're using Gmail, please make sure to use your App Password if 2-Step Verification is enabled.")
+    password = input("Enter your email password or App Password: ").strip()
+
     attach_file = input("Do you want to attach a file? (yes/no): ").strip().lower()
     attachment_path = None
     if attach_file == 'yes':
@@ -65,18 +77,16 @@ def main():
     if html_include == 'yes':
         html_path = input("Enter the file path of the HTML file: ").strip()
 
-    # Read email addresses from file
     with open('emails.txt', 'r') as file:
         email_list = file.read().splitlines()
 
     threads = []
     for email in email_list:
-        thread = threading.Thread(target=send_email, args=(email, attachment_path if attach_file == 'yes' else None, html_path))
+        thread = threading.Thread(target=send_email, args=(email, sender_email, password, attachment_path if attach_file == 'yes' else None, html_path))
         threads.append(thread)
         thread.start()
-        time.sleep(2)  # Adjust the delay of the threads
+        time.sleep(2)
 
-    # Wait for all threads to complete
     for thread in threads:
         thread.join()
 
