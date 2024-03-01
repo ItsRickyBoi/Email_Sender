@@ -8,12 +8,13 @@ import time
 import os
 
 def send_email(receiver_email, attachment_path=None, html_path=None):
-    sender_email = "your@mail.com" #your hotmail email
+    sender_email = "your@mail.co" #your hotmail email
     password = "your_hotmail_password" #your hotmail password ( must be your hotmail password, not your app password)
+    sender_name = "Your Name" #your name
 
     # Create MIME message
     msg = MIMEMultipart('alternative')  # Use 'alternative' to support both plain text and HTML
-    msg['From'] = sender_email
+    msg['From'] = f"{sender_name} <{sender_email}>"
     msg['To'] = receiver_email
     msg['Subject'] = "HTML Email from Hotmail"
 
