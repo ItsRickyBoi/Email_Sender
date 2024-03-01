@@ -60,8 +60,10 @@ def main():
     if attach_file == 'yes':
         attachment_path = input("Enter the file path of the attachment: ").strip()
 
-    # Optionally, specify the path to your HTML file
-    html_path = "path/to/your/html_file.html"  # Adjust this path or your html file name if already in the same directory
+    html_include = input("Do you want to include an HTML file? (yes/no): ").strip().lower()
+    html_path = None
+    if html_include == 'yes':
+        html_path = input("Enter the file path of the HTML file: ").strip()
 
     # Read email addresses from file
     with open('emails.txt', 'r') as file:
